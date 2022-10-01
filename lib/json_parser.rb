@@ -13,11 +13,17 @@ class JsonParser
     end
   end
 
-  def parse symbol, value = nil
-    unless value
-      @db[symbol.to_s]
+  def parse symbols, value = nil
+    if symbols.class.name == "Array"
+      symbols_join = symbols.join("\"][\"").prepend("[\"").concat("\"]")
     else
-      @db[symbol.to_s] = value
+      symbols_join = symbols.to_s.prepend("[\"").concat("\"]")
+    end
+
+    unless value
+      eval "@db#{ symbols_join }"
+    else
+      eval "@db#{ symbols_join } = value"
       write @path, @db
     end
   end
