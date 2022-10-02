@@ -2,6 +2,8 @@ require "json"
 require 'fileutils'
 
 class JsonParser
+  attr_reader :db
+  
   def initialize path
     @path = path
     @db = open @path
