@@ -15,7 +15,7 @@ class JsonParser
     end
   end
 
-  def parse symbols, value = nil
+  def parse symbols, value = nil, delete = nil
     symbols_join = ""
     if symbols.class.name == "Array"
       symbols_join = symbols.join("\"][\"")
@@ -24,16 +24,29 @@ class JsonParser
     end
     symbols_join = "[\"#{symbols_join}\"]"
 
-    unless value
-      eval "@db#{ symbols_join }"
+    unless delete
+      unless value
+        eval "@db#{ symbols_join }"
+      else
+        eval "@db#{ symbols_join } = value"
+        write @path, @db
+      end
     else
-      eval "@db#{ symbols_join } = value"
+      if symbols
+        eval "@db#{ symbols_join }.delete('#{delete}')"
+      else
+        eval "@db.delete('#{delete}')"
+      end
       write @path, @db
     end
   end
 
   def exist?
     @db.empty?
+  end
+
+  def delete key, symbols = nil
+    parse(symbols, nil, key)
   end
 
   private
