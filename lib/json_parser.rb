@@ -16,11 +16,13 @@ class JsonParser
   end
 
   def parse symbols, value = nil
+    symbols_join = ""
     if symbols.class.name == "Array"
-      symbols_join = symbols.join("\"][\"").prepend("[\"").concat("\"]")
+      symbols_join = symbols.join("\"][\"")
     else
-      symbols_join = symbols.to_s.prepend("[\"").concat("\"]")
+      symbols_join = symbols.to_s
     end
+    symbols_join = "[\"#{symbols_join}\"]"
 
     unless value
       eval "@db#{ symbols_join }"
