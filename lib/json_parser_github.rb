@@ -16,9 +16,15 @@ class JsonParserGithub < JsonParser
 
     @repository = repository
     @client = Octokit::Client.new(access_token: GITHUB_ACCESS_TOKEN)
-    @content = @client.contents(repository, path: path, query: {ref: branch})
 
-    super path
+    @content = @client.contents(repository, path: path, query: {ref: branch})
+    @sha = @content.sha
+
+    super path, false
+  end
+
+  def push
+    write(@path, @db)
   end
 
   private
@@ -44,10 +50,14 @@ class JsonParserGithub < JsonParser
     begin
       @client.update_contents(@repository,
         path,
-        MESSAGE_UPDATE,
-        @content.sha,
+        "#{MESSAGE_UPDATE} #{Time.now}",
+        @sha,
         JSON.pretty_generate(db)
       )
+
+      @sha = @client.last_response.data.content.sha
+    rescue
+      puts "409 HTTP status code for #{path}"
     end
   end
 end

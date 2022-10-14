@@ -4,9 +4,10 @@ require 'fileutils'
 class JsonParser
   attr_reader :db
   
-  def initialize path
+  def initialize path, auto_write = true
     @path = path
     @db = open @path
+    @auto_write = auto_write
   end
 
   def on symbol, value
@@ -29,7 +30,10 @@ class JsonParser
         eval "@db#{ symbols_join }"
       else
         eval "@db#{ symbols_join } = value"
-        write @path, @db
+        
+        if @auto_write
+          write @path, @db
+        end
       end
     else
       if symbols
@@ -37,7 +41,10 @@ class JsonParser
       else
         eval "@db.delete('#{delete}')"
       end
-      write @path, @db
+
+      if @auto_write
+        write @path, @db
+      end
     end
   end
 
