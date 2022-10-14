@@ -3,6 +3,7 @@ require_relative 'json_parser'
 require 'octokit'
 require 'base64'
 require 'json'
+require 'open-uri'
 
 class JsonParserGithub < JsonParser
   MESSAGE_UPDATE = "Updating content"
@@ -23,8 +24,15 @@ class JsonParserGithub < JsonParser
   private
   def open path
     begin
-      content_decode = Base64.decode64(@content.content)
-      result = JSON.parse content_decode
+      content = @content.content
+      unless content
+        content_decode = Base64.decode64(content)
+        result = JSON.parse content_decode
+      else
+        URI.open @content.download_url do |f|
+          result = JSON.parse f.read
+        end
+      end
 
       return result
     rescue
